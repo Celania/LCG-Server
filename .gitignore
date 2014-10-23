@@ -13,3 +13,7 @@ hs_err_pid*
 
 #java build path
 /bin/
+
+#ctags
+*.tags
+*.tags_sorted_by_file
