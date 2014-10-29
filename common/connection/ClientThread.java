@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.ServerSocket;
+import java.util.concurrent.locks.ReentrantLock;
 
 import communication.Action;
 import communication.Command;
@@ -24,6 +25,8 @@ import communication.Message;
  * chat room this thread informs also all the clients about that and terminates.
  */
 class ClientThread extends Thread {
+	
+  private final static ReentrantLock lock = new ReentrantLock();
 
   private String clientName = null;
   private ObjectInputStream is = null;
@@ -43,13 +46,12 @@ class ClientThread extends Thread {
     heroChoice = 0;
   }
   
-  synchronized public void opponentFound(ClientThread opponent) throws IOException{
+  public void opponentFound(ClientThread opponent) throws IOException{
 	  status = ConnectionStatus.IN_GAME;
 	  this.opponent = opponent;
 	  Message message = new Message();
 	  message.addAction(new Action(0, opponent.heroChoice, opponent.clientName));
-	  os.writeObject(message);
-	  
+	  os.writeObject(message);  
   }
 
   public void run() {
@@ -80,8 +82,11 @@ class ClientThread extends Thread {
       
 //      search for an opponent who is not in a game yet.
       while (status == ConnectionStatus.WAITING_FOR_OPPONENT){
+    	  lock.lock();
+    		  if(status == ConnectionStatus.IN_GAME){
+    			  break;
+    		  }
     	  for (int i = 0; i < maxClientsCount; i++){
-    		  synchronized(this){
     			  if(threads[i] != null && threads[i] != this
     				&& threads[i].status == ConnectionStatus.WAITING_FOR_OPPONENT){
     				  opponent = threads[i];
@@ -94,9 +99,11 @@ class ClientThread extends Thread {
 //    						  + this.heroChoice +" against "+ opponent.heroChoice);
     				  break;
     			  }
-    		  }
     	  }
+    	  if(status == ConnectionStatus.WAITING_FOR_OPPONENT)
+    		  lock.unlock();
       }
+      lock.unlock();
       
       while (true){
     	  command = (Command) is.readObject();
