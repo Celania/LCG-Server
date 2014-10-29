@@ -1,6 +1,9 @@
-package effects;
+package manager;
 
 import java.util.Map;
+
+import effects.PermEffect;
+import effects.TempEffect;
 
 public class EffectManager {
 

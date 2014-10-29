@@ -14,6 +14,10 @@ public class Game {
 		
 	}
 	
+	public Message attack(int attackerID, int attackedID){
+		return null;
+	}
+	
 	public Command receive() {
 		return null;
 	}
