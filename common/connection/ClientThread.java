@@ -73,17 +73,19 @@ class ClientThread extends Thread {
 	    clientName = command.getParam3();
 	    heroChoice = command.getParam1();
 	    
-	    status = ConnectionStatus.WAITING_FOR_OPPONENT;
-	    
 	    Message message = new Message();
 	    message.addAction(new Action(1,0,"Waiting for Opponent"));
 	    
 	    os.writeObject(message);
+	    
+	    status = ConnectionStatus.WAITING_FOR_OPPONENT;
+	    
       
 //      search for an opponent who is not in a game yet.
       while (status == ConnectionStatus.WAITING_FOR_OPPONENT){
     	  lock.lock();
     		  if(status == ConnectionStatus.IN_GAME){
+    			  lock.unlock();
     			  break;
     		  }
     	  for (int i = 0; i < maxClientsCount; i++){
@@ -92,18 +94,15 @@ class ClientThread extends Thread {
     				  opponent = threads[i];
     				  opponent.opponentFound(this);
     				  status = ConnectionStatus.IN_GAME;
-    				  message = new Message();
+    				  os.reset();
+    				  message.clear();
     				  message.addAction(new Action(0, opponent.heroChoice, opponent.clientName));
     				  os.writeObject(message);
-//    				  os.println("Game started with "+ opponent.clientName +" playing "
-//    						  + this.heroChoice +" against "+ opponent.heroChoice);
     				  break;
     			  }
     	  }
-    	  if(status == ConnectionStatus.WAITING_FOR_OPPONENT)
-    		  lock.unlock();
+    	  lock.unlock();
       }
-      lock.unlock();
       
       while (true){
     	  command = (Command) is.readObject();
@@ -112,9 +111,10 @@ class ClientThread extends Thread {
     		  break;
     	  
     	  
-    	  message = new Message();
+    	  message.clear();
     	  Action action = new Action(1,2,"");
     	  message.addAction(action);
+    	  os.reset();
     	  os.writeObject(message);
     	    
       }

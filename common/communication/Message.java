@@ -21,6 +21,10 @@ public class Message implements Serializable{
 		return actions.iterator();
 	}
 	
+	public void clear(){
+		actions.clear();
+	}
+	
 	public Message(){
 		actions = new LinkedList<Action>();
 	}
