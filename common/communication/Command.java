@@ -6,15 +6,15 @@ public class Command implements Serializable{
 
 	private static final long serialVersionUID = 6195055236038777963L;
 	
-	private int command;
+	private CommandEnum command;
 	private int param1;
 	private int param2;
 	private String param3;
 	
-	public int getCommand() {
+	public CommandEnum getCommand() {
 		return command;
 	}
-	public void setCommand(int command) {
+	public void setCommand(CommandEnum command) {
 		this.command = command;
 	}
 	public int getParam1() {
@@ -37,7 +37,7 @@ public class Command implements Serializable{
 	}
 	
 	public void clear(){
-		command = -1;
+		command = null;
 		param1 = 0;
 		param2 = 0;
 		param3 = null;

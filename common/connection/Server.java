@@ -1,15 +1,19 @@
 package connection;
 
 
+import game.Game;
+
 import java.io.DataInputStream;
 import java.io.PrintStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 
-/*
- * A chat server that delivers public and private messages.
- */
+import stores.DBStore;
+import system.MatchMaking;
+import system.StdHandler;
+
 public class Server {
 
   // The server socket.
@@ -19,53 +23,65 @@ public class Server {
 
   // This chat server can accept up to maxClientsCount clients' connections.
   private static final int maxClientsCount = 10;
-  private static final ClientThread[] threads = new ClientThread[maxClientsCount];
+  private static final Client[] clients = new Client[maxClientsCount];
 
-  public static void main(String args[]) {
-
-    // The default port number.
-    int portNumber = 2222;
-    if (args.length < 1) {
-      System.out
-          .println("Usage: java MultiThreadChatServer <portNumber>\n"
-              + "Now using port number=" + portNumber);
-    } else {
-      portNumber = Integer.valueOf(args[0]).intValue();
-    }
-
-    /*
-     * Open a server socket on the portNumber (default 2222). Note that we can
-     * not choose a port less than 1023 if we are not privileged users (root).
-     */
-    try {
-      serverSocket = new ServerSocket(portNumber);
-    } catch (IOException e) {
-      System.out.println(e);
-    }
-
-    /*
-     * Create a client socket for each connection and pass it to a new client
-     * thread.
-     */
-    while (true) {
-      try {
-        clientSocket = serverSocket.accept();
-        int i = 0;
-        for (i = 0; i < maxClientsCount; i++) {
-          if (threads[i] == null) {
-            (threads[i] = new ClientThread(clientSocket, threads)).start();
-            break;
-          }
-        }
-        if (i == maxClientsCount) {
-          PrintStream os = new PrintStream(clientSocket.getOutputStream());
-          os.println("Server too busy. Try later.");
-          os.close();
-          clientSocket.close();
-        }
-      } catch (IOException e) {
-        System.out.println(e);
-      }
-    }
+  // Game threads
+  private static ArrayList<Game> games = new ArrayList<Game>();
+  
+  private static MatchMaking matchMaking = MatchMaking.getInstance();
+  private static StdHandler stdHandler = StdHandler.getInstance();
+  
+  public static void addGame(Game game){
+	  games.add(game);
+	  game.start();
   }
+  
+  public static void main(String args[]) {
+	    // The default port number.
+	    int portNumber = 2222;
+	    if (args.length < 1) {
+	      System.out
+	          .println("Usage: java MultiThreadChatServer <portNumber>\n"
+	              + "Now using port number=" + portNumber);
+	    } else {
+	      portNumber = Integer.valueOf(args[0]).intValue();
+	    }
+
+	    /*
+	     * Open a server socket on the portNumber (default 2222). Note that we can
+	     * not choose a port less than 1023 if we are not privileged users (root).
+	     */
+	    
+	    try {
+	      serverSocket = new ServerSocket(portNumber);
+	    } catch (IOException e) {
+	      System.out.println(e);
+	    }
+	    
+	    DBStore.loadDB();
+	    
+	    matchMaking.start();
+	    stdHandler.start();
+	    
+
+	    /*
+	     * Create a client socket for each connection and pass it to a new client
+	     * thread.
+	     */
+	    while (true) {
+	      try {
+	        clientSocket = serverSocket.accept();
+	        int i = 0;
+	        for (i = 0; i < maxClientsCount; i++) {
+	          if (clients[i] == null) {
+	            clients[i] = new Client(clientSocket);
+	            stdHandler.addClient(clients[i]);
+	            break;
+	          }
+	        }
+	      } catch (IOException e) {
+	        System.out.println(e);
+	      }
+	    }
+	  }
 }

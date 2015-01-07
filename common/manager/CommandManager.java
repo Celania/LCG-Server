@@ -1,24 +1,19 @@
 package manager;
 
+import java.util.UUID;
+
 import game.Game;
 import communication.Command;
 import communication.Message;
 
 public class CommandManager {
-	
-	private static class InstanceHolder {
-	    private static final CommandManager instance = new CommandManager();
-	}
-
-	public static CommandManager getInstance() {
-	    return InstanceHolder.instance;
-	}
-	
-	public Message execute(Game game, Command command){
+		
+	public static Message execute(Game game, Command command, UUID clientID){
 		Message message = new Message();
 		
 		switch(command.getCommand()){
-			case 1:    
+		
+			//case CARD_PLAY:	message = game.playCard(command.getParam1(), command.getParam2());
 		}
 		
 		
