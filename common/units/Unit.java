@@ -1,32 +1,64 @@
 package units;
 
-import effects.Effect;
+import java.util.List;
 
-public class Unit extends Card {
+import effects.base.PermEffect;
+import effects.base.TempEffect;
+import game.PlayerInformation;
 
-	private final int baseHealth;
-	private final int baseAttack;
-	//private final Effect battlecry;
-	private final int baseStatusMask;
-	
-	public Unit(int cardID, String name, int baseHealth,
-				int baseAttack, int baseManaCost,
-				int statusMask, String description){
-		super(cardID, name, baseManaCost, description);
-		this.baseHealth = baseHealth;
-		this.baseAttack = baseAttack;
-		this.baseStatusMask = statusMask;
-	}
-	
-	public int getBaseHealth(){
-		return baseHealth;
-	}
-	
-	public int getBaseAttack(){
-		return baseAttack;
-	}
-	
-	public int getBaseStatusMask(){
-		return baseStatusMask;
-	}
+public class Unit extends Card implements UnitInfo {
+
+    private BaseUnit baseUnit;
+    private int maxHealth;
+    private int attack;
+
+
+    public Unit(PlayerInformation owner, BaseUnit baseUnit) {
+        super(owner);
+        this.baseUnit = baseUnit;
+        this.maxHealth = baseUnit.getBaseHealth();
+        this.attack = baseUnit.getBaseAttack();
+    }
+
+    public int getBaseStatusMask() {
+        return baseUnit.getBaseStatusMask();
+    }
+
+    public int getBaseHealth() {
+        return baseUnit.getBaseHealth();
+    }
+
+    public int getBaseAttack() { return baseUnit.getBaseAttack(); }
+
+    public List<PermEffect> getPermEffects() {
+        return baseUnit.getPermEffects();
+    }
+
+    public List<TempEffect> getTempEffects() {
+        return baseUnit.getTempEffects();
+    }
+
+    @Override
+    public int getManaCost() {
+        return Math.max(baseUnit.getManaCost() + modifyMana, 0);
+    }
+
+    @Override
+    public int getBaseID() {
+        return baseUnit.getBaseID();
+    }
+
+    @Override
+    public String getName() {
+        return baseUnit.getName();
+    }
+
+    @Override
+    public String getDescription() {
+        return baseUnit.getDescription();
+    }
+
+    @Override
+    public int getCardType() { return BaseCard.CardType.Creature; }
+
 }

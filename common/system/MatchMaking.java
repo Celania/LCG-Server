@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import communication.command.CommandAbortQueue;
+import events.SystemEvent;
+import events.interop.base.InteropEvent;
+import events.system.QueueLeft;
+import events.system.WaitingForOpponent;
 import game.Game;
 import communication.Action;
 import communication.ActionEnum;
@@ -40,13 +45,9 @@ public class MatchMaking extends CommandAcceptor{
 		UUID clientID = serverCommand.getClientID();
 		Command command = serverCommand.getCommand();
 		
-		switch(command.getCommand()){
-		case ABORT:
-			onAbort(clientID);
-			break;
-		default:
-			break;
-		}		
+		if (command instanceof CommandAbortQueue) {
+            onAbort(clientID);
+        }
 	}
 	
 	// need to check whether client is on the remove list
@@ -70,26 +71,26 @@ public class MatchMaking extends CommandAcceptor{
 	    }
 	}
 	
-	public List<Action> onAddClient(){
-		List<Action> actions = new LinkedList<Action>();
+	public List<SystemEvent> onAddClient(){
+		List<SystemEvent> events = new LinkedList<>();
 		
-		actions.add(new Action(ActionEnum.WAITING_FOR_OPPONENT,0, ""));
+		events.add(new WaitingForOpponent());
 		System.out.println("Client queued");
 		
-		return actions;
+		return events;
 	}
 	
-	public List<Action> onRemoveClient(UUID clientID){
-		List<Action> actions = new LinkedList<Action>();
+	public List<SystemEvent> onRemoveClient(UUID clientID){
+		List<SystemEvent> events = new LinkedList<>();
 		
 		System.out.println("Client with ID:"+ clientID +" dropped out of Queue");				
-		actions.add(new Action(ActionEnum.QUEUE_LEFT,0,""));
+		events.add(new QueueLeft());
 		
-		return actions;
+		return events;
 	}
 	
-	private List<Action> onAbort(UUID clientID){
-		List<Action> actions = new LinkedList<Action>();
+	private List<InteropEvent> onAbort(UUID clientID){
+		List<InteropEvent> actions = new LinkedList<>();
 		
 		Client client = clients.get(clientID);
 		removeClient(client);

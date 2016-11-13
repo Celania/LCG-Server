@@ -1,18 +1,29 @@
 package units;
 
-import effects.Effect;
+import game.PlayerInformation;
 
-public abstract class Card {
+// TODO Player holds Cards in hand, shouldnt be abstract?
+// TODO should a card be targetable?
+public abstract class Card implements CardInfo {
 
-	private int baseID;
-	private int baseManaCost;
-	private String name;
-	private String description;
-	
-	protected Card(int baseID, String name, int baseManaCost, String description){
-		this.baseID = baseID;
-		this.name = name;
-		this.baseManaCost = baseManaCost;
-		this.description = description;
-	}
+    protected int             modifyMana;
+
+    private PlayerInformation owner;
+
+    protected Card(PlayerInformation owner) {
+        this.owner = owner;
+    }
+
+    public PlayerInformation getOwner() {
+        return owner;
+    }
+
+    public void modifyManaCost(int amount) {
+        modifyMana += amount;
+    }
+
+    public void resetManaCost() {
+        modifyMana = 0;
+    }
+
 }

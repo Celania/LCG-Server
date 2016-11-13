@@ -14,8 +14,10 @@ import communication.ActionEnum;
 import communication.Command;
 import communication.Message;
 import communication.ServerCommand;
+import communication.command.CommandQueue;
 import connection.Client;
 import connection.ConnectionStatus;
+import events.SystemEvent;
 
 
 public class StdHandler extends CommandAcceptor{
@@ -37,38 +39,30 @@ public class StdHandler extends CommandAcceptor{
 	
 	protected void commandDispatch(ServerCommand serverCommand){
 		Command command = serverCommand.getCommand();
-		
-		switch(command.getCommand()){
-		
-		case QUEUE:
-			onQueue(command.getParam1(), serverCommand.getClientID());
-			break;
-		case CLOSE:
-			break;
-		case ABORT:
-			break;
-		default:
-			break;
+
+		if (command instanceof CommandQueue){
+            CommandQueue commandQueue =(CommandQueue) command;
+            onQueue(commandQueue.heroChoice, serverCommand.getClientID());
 		}
-		
+
 	}
 
 	public void onRun(){
 		
 	}
 	
-	public List<Action> onAddClient(){
-		List<Action> actions = new LinkedList<Action>();
+	public List<SystemEvent> onAddClient(){
+		List<SystemEvent> events = new LinkedList<>();
 		
 		//message.addAction(new Action(ActionEnum.WAITING_FOR_OPPONENT,0, ""));
 		
-		return actions;
+		return events;
 	}
 	
-	public List<Action> onRemoveClient(){
-		List<Action> actions = new LinkedList<Action>();
+	public List<SystemEvent> onRemoveClient(){
+		List<SystemEvent> events = new LinkedList<>();
 		
-		return actions;
+		return events;
 	}
 	
 	private void onQueue(int heroChoice, UUID clientID){
